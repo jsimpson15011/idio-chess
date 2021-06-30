@@ -1,0 +1,27 @@
+﻿.board__row{
+    display: flex;
+}
+.board__square{
+    background: #780404;
+    height: 100px;
+    width: 100px;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.board__square img{
+    max-width: 100%;
+    max-height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.board__row:nth-child(even) .board__square:nth-child(odd)
+{
+    background: #c4c7c7;
+}
+.board__row:nth-child(odd) .board__square:nth-child(even)
+{
+    background: #c4c7c7;
+}

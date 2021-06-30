@@ -4,9 +4,20 @@ import { AppThunkAction } from './';
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
 
+type ChessPiece = {
+    color: string,
+    name: string,
+    value: number
+}
+
+type ChessBoardSquare = {
+    piece: ChessPiece,
+    key: string
+}
+
 export interface ChessBoardState {
     isLoading: boolean;
-    board: string[][];
+    board: ChessBoardSquare[][];
 }
 
 
@@ -20,7 +31,7 @@ interface RequestBoardAction {
 
 interface ReceiveBoardAction {
     type: 'RECEIVE_BOARD';
-    board: string[][];
+    board: ChessBoardSquare[][];
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
@@ -37,7 +48,7 @@ export const actionCreators = {
         const appState = getState();
         if (true) {
                 fetch(`chessboard`)
-                    .then(response => response.json() as Promise<string[][]>)
+                    .then(response => response.json() as Promise<ChessBoardSquare[][]>)
                     .then(data => {
                         console.log(data);
                         dispatch({ type: 'RECEIVE_BOARD', board: data });

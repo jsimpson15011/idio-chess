@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using idiot_chess.ClientApp;
 using Microsoft.AspNetCore.Mvc;
 
 namespace idiot_chess.Controllers
@@ -9,7 +10,7 @@ namespace idiot_chess.Controllers
     public class ChessBoardController : ControllerBase
     {
         [HttpGet]
-        public char[][] Get()
+        public ChessSquare[][] Get()
         {
             ChessBoard board = new ChessBoard();
             //return Enumerable.Range(1,1).Select(index => new ChessBoard()).ToArray();
