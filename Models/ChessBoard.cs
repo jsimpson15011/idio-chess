@@ -161,10 +161,53 @@ namespace idiot_chess.Models
 
             if (piece.Name == "rook" || piece.Name == "queen")
             {
-                FindMovesFromDirection(pieceLocation, solution, new []{-1, 0});
-                FindMovesFromDirection(pieceLocation, solution, new []{1, 0});
-                FindMovesFromDirection(pieceLocation, solution, new []{0, -1});
-                FindMovesFromDirection(pieceLocation, solution, new []{0, 1});
+                FindMovesFromDirection(pieceLocation, solution, new[] {-1, 0});
+                FindMovesFromDirection(pieceLocation, solution, new[] {1, 0});
+                FindMovesFromDirection(pieceLocation, solution, new[] {0, -1});
+                FindMovesFromDirection(pieceLocation, solution, new[] {0, 1});
+            }
+
+            if (piece.Name == "knight")
+            {
+                if (pieceLocation[0] - 2 >= 0 && pieceLocation[1] + 1 <= Board.Length - 1)
+                {
+                    solution.Add(new[] {pieceLocation[0] - 2, pieceLocation[1] + 1});
+                }
+
+                if (pieceLocation[0] - 2 >= 0 && pieceLocation[1] - 1 >= 0)
+                {
+                    solution.Add(new[] {pieceLocation[0] - 2, pieceLocation[1] - 1});
+                }
+                
+                if (pieceLocation[0] + 2 <= Board.Length - 1 && pieceLocation[1] + 1 <= Board.Length - 1)
+                {
+                    solution.Add(new[] {pieceLocation[0] + 2, pieceLocation[1] + 1});
+                }
+
+                if (pieceLocation[0] + 2 <= Board.Length - 1 && pieceLocation[1] - 1 >= 0)
+                {
+                    solution.Add(new[] {pieceLocation[0] + 2, pieceLocation[1] - 1});
+                }
+                
+                if (pieceLocation[0] - 1 >= 0 && pieceLocation[1] + 2 <= Board.Length - 1)
+                {
+                    solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1] + 2});
+                }
+
+                if (pieceLocation[0] - 1 >= 0 && pieceLocation[1] - 2 >= 0)
+                {
+                    solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1] - 2});
+                }
+                
+                if (pieceLocation[0] + 1 <= Board.Length - 1 && pieceLocation[1] + 2 <= Board.Length - 1)
+                {
+                    solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1] + 2});
+                }
+
+                if (pieceLocation[0] + 1 <= Board.Length - 1 && pieceLocation[1] - 2 >= 0)
+                {
+                    solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1] - 2});
+                }
             }
 
             foreach (int[] location in solution.ToList())
@@ -208,7 +251,8 @@ namespace idiot_chess.Models
             return new ChessSquare("xx");
         }
 
-        private void FindMovesFromDirection(IReadOnlyList<int> pieceLocation, ICollection<int[]> solution, int[] direction)
+        private void FindMovesFromDirection(IReadOnlyList<int> pieceLocation, ICollection<int[]> solution,
+            int[] direction)
         {
             int[] possibleMove = {pieceLocation[0] + direction[0], pieceLocation[1] + direction[1]};
 
@@ -219,6 +263,7 @@ namespace idiot_chess.Models
             {
                 return;
             }
+
             ChessSquare squareToCheck = Board[possibleMove[0]][possibleMove[1]];
 
             while ((direction[0] == 1 || direction[0] == 0 || possibleMove[0] >= 0) &&
@@ -249,7 +294,7 @@ namespace idiot_chess.Models
                 }
             }
         }
-        
+
         public void ClearAllSquareStatus()
         {
             for (int i = 0; i < Board.Length; i++)
