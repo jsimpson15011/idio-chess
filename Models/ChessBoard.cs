@@ -124,8 +124,7 @@ namespace idiot_chess.Models
                 if (Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1]].Piece == null)
                 {
                     solution.Add(new[] {pieceLocation[0] + pawnMovementDirection, pieceLocation[1]});
-                    if (Board[pieceLocation[0] + 2 * pawnMovementDirection][pieceLocation[1]].Piece == null &&
-                        !piece.HasMoved)
+                    if (!piece.HasMoved && Board[pieceLocation[0] + 2 * pawnMovementDirection][pieceLocation[1]].Piece == null)
                     {
                         solution.Add(new[] {pieceLocation[0] + 2 * pawnMovementDirection, pieceLocation[1]});
                     }
