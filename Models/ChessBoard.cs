@@ -209,6 +209,41 @@ namespace idiot_chess.Models
                 }
             }
 
+            if (piece.Name == "king")
+            {
+                if (pieceLocation[0] - 1 >= 0)
+                {
+                    if (pieceLocation[1] - 1 >= 0)
+                    {
+                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]-1});
+                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]});
+                        solution.Add(new []{pieceLocation[0], pieceLocation[1]-1});
+                    }
+                    if (pieceLocation[1] + 1 <= Board.Length - 1)
+                    {
+                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]+1});
+                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]});
+                        solution.Add(new []{pieceLocation[0], pieceLocation[1]+1});
+                    }
+                }
+                
+                if (pieceLocation[0] + 1 <= Board.Length - 1)
+                {
+                    if (pieceLocation[1] - 1 >= 0)
+                    {
+                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]-1});
+                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]});
+                        solution.Add(new []{pieceLocation[0], pieceLocation[1]-1});
+                    }
+                    if (pieceLocation[1] + 1 <= Board.Length - 1)
+                    {
+                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]+1});
+                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]});
+                        solution.Add(new []{pieceLocation[0], pieceLocation[1]+1});
+                    }
+                }
+            }
+
             foreach (int[] location in solution.ToList())
             {
                 if (Board[location[0]][location[1]].Piece?.Color ==
