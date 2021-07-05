@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace idiot_chess.ClientApp
+namespace idiot_chess.Models
 {
     public class ChessPiece
     {
+        public ChessPiece()
+        {}
         
         public ChessPiece(string color, string name)
         {
@@ -24,8 +26,12 @@ namespace idiot_chess.ClientApp
 
 
 
-        public string Color { get; }
-        public string Name { get; }
-        public int Value { get; }
+        public string Color { get; set; }
+        public string Name { get; set; }
+        public int Value { get; set; }
+        
+        public bool HasMoved { get; set; }
+        
+        
     }
 }

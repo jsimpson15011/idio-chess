@@ -5,8 +5,9 @@
     background: #780404;
     height: 100px;
     width: 100px;
-    padding: 1rem;
+    padding: .5rem;
     box-sizing: border-box;
+    position: relative;
 }
 
 .board__square img{
@@ -24,4 +25,16 @@
 .board__row:nth-child(odd) .board__square:nth-child(even)
 {
     background: #c4c7c7;
+}
+
+.board__move-indicator{
+    height: 50px;
+    width: 50px;
+    opacity: .5;
+    position: absolute;
+    background: #242424;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
