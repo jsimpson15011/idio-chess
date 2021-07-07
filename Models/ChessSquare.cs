@@ -1,4 +1,6 @@
-﻿namespace idiot_chess.Models
+﻿using System.Collections.Generic;
+
+namespace idiot_chess.Models
 {
     public class ChessSquare
     {
@@ -10,9 +12,10 @@
             Key = key;
             IsActive = false;
             CanMoveTo = false;
-            UnderThreatFrom = null;
-            EnPassantPiece = null;
-            RookToCastle = null;
+            UnderThreatFromWhite = null;
+            UnderThreatFromBlack = null;
+            EnPassantPieceSquare = null;
+            SquareWithRookToCastle = null;
         }
 
         public ChessSquare(string key)
@@ -21,9 +24,10 @@
             Piece = null;
             IsActive = false;
             CanMoveTo = false;
-            UnderThreatFrom = null;
-            EnPassantPiece = null;
-            RookToCastle = null;
+            UnderThreatFromWhite = null;
+            UnderThreatFromBlack = null;
+            EnPassantPieceSquare = null;
+            SquareWithRookToCastle = null;
         }
 
         public string Key { get; set; }
@@ -33,10 +37,12 @@
         
         public bool CanMoveTo { get; set; }
         
-        public ChessPiece UnderThreatFrom { get; set; }
+        public List<ChessSquare> UnderThreatFromWhite { get; set; }
         
-        public ChessPiece EnPassantPiece { get; set; }
+        public List<ChessSquare> UnderThreatFromBlack { get; set; }
         
-        public ChessPiece RookToCastle { get; set; }
+        public ChessSquare EnPassantPieceSquare { get; set; }
+        
+        public ChessSquare SquareWithRookToCastle { get; set; }
     }
 }

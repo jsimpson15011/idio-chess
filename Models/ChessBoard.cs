@@ -124,7 +124,8 @@ namespace idiot_chess.Models
                 if (Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1]].Piece == null)
                 {
                     solution.Add(new[] {pieceLocation[0] + pawnMovementDirection, pieceLocation[1]});
-                    if (!piece.HasMoved && Board[pieceLocation[0] + 2 * pawnMovementDirection][pieceLocation[1]].Piece == null)
+                    if (!piece.HasMoved &&
+                        Board[pieceLocation[0] + 2 * pawnMovementDirection][pieceLocation[1]].Piece == null)
                     {
                         solution.Add(new[] {pieceLocation[0] + 2 * pawnMovementDirection, pieceLocation[1]});
                     }
@@ -177,7 +178,7 @@ namespace idiot_chess.Models
                 {
                     solution.Add(new[] {pieceLocation[0] - 2, pieceLocation[1] - 1});
                 }
-                
+
                 if (pieceLocation[0] + 2 <= Board.Length - 1 && pieceLocation[1] + 1 <= Board.Length - 1)
                 {
                     solution.Add(new[] {pieceLocation[0] + 2, pieceLocation[1] + 1});
@@ -187,7 +188,7 @@ namespace idiot_chess.Models
                 {
                     solution.Add(new[] {pieceLocation[0] + 2, pieceLocation[1] - 1});
                 }
-                
+
                 if (pieceLocation[0] - 1 >= 0 && pieceLocation[1] + 2 <= Board.Length - 1)
                 {
                     solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1] + 2});
@@ -197,7 +198,7 @@ namespace idiot_chess.Models
                 {
                     solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1] - 2});
                 }
-                
+
                 if (pieceLocation[0] + 1 <= Board.Length - 1 && pieceLocation[1] + 2 <= Board.Length - 1)
                 {
                     solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1] + 2});
@@ -211,35 +212,87 @@ namespace idiot_chess.Models
 
             if (piece.Name == "king")
             {
+                //check for castling
+                if (piece.HasMoved == false)
+                {
+                    if (Board[pieceLocation[0]][pieceLocation[1] - 1].Piece == null &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] - 1].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] - 1].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] - 2].Piece == null &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] - 2].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] - 2].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] - 3].Piece == null &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] - 3].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] - 3].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] - 4].Piece?.HasMoved == false &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromWhite == null)
+                    )
+                    {
+                        int[] castlingMove = {pieceLocation[0], pieceLocation[1] - 3};
+                        solution.Add(castlingMove);
+
+                        Board[pieceLocation[0]][pieceLocation[1] - 3].SquareWithRookToCastle =
+                            Board[pieceLocation[0]][pieceLocation[1] - 4];
+                    }
+
+                    if (Board[pieceLocation[0]][pieceLocation[1] + 1].Piece == null &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] + 1].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] + 1].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] + 2].Piece == null &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] + 2].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] + 2].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] + 3].Piece?.HasMoved == false &&
+                        (ActivePlayer.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromWhite == null)
+                    )
+                    {
+                        int[] castlingMove = {pieceLocation[0], pieceLocation[1] + 2};
+                        solution.Add(castlingMove);
+
+                        Board[pieceLocation[0]][pieceLocation[1] + 2].SquareWithRookToCastle =
+                            Board[pieceLocation[0]][pieceLocation[1] + 3];
+                    }
+                }
+
                 if (pieceLocation[0] - 1 >= 0)
                 {
                     if (pieceLocation[1] - 1 >= 0)
                     {
-                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]-1});
-                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]});
-                        solution.Add(new []{pieceLocation[0], pieceLocation[1]-1});
+                        solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1] - 1});
+                        solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1]});
+                        solution.Add(new[] {pieceLocation[0], pieceLocation[1] - 1});
                     }
+
                     if (pieceLocation[1] + 1 <= Board.Length - 1)
                     {
-                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]+1});
-                        solution.Add(new []{pieceLocation[0]-1, pieceLocation[1]});
-                        solution.Add(new []{pieceLocation[0], pieceLocation[1]+1});
+                        solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1] + 1});
+                        solution.Add(new[] {pieceLocation[0] - 1, pieceLocation[1]});
+                        solution.Add(new[] {pieceLocation[0], pieceLocation[1] + 1});
                     }
                 }
-                
+
                 if (pieceLocation[0] + 1 <= Board.Length - 1)
                 {
                     if (pieceLocation[1] - 1 >= 0)
                     {
-                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]-1});
-                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]});
-                        solution.Add(new []{pieceLocation[0], pieceLocation[1]-1});
+                        solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1] - 1});
+                        solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1]});
+                        solution.Add(new[] {pieceLocation[0], pieceLocation[1] - 1});
                     }
+
                     if (pieceLocation[1] + 1 <= Board.Length - 1)
                     {
-                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]+1});
-                        solution.Add(new []{pieceLocation[0]+1, pieceLocation[1]});
-                        solution.Add(new []{pieceLocation[0], pieceLocation[1]+1});
+                        solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1] + 1});
+                        solution.Add(new[] {pieceLocation[0] + 1, pieceLocation[1]});
+                        solution.Add(new[] {pieceLocation[0], pieceLocation[1] + 1});
                     }
                 }
             }
@@ -260,8 +313,21 @@ namespace idiot_chess.Models
         {
             int[] currentSquareLocation = _squareLocations[currentSquare.Key];
             ActiveSquare.Piece.HasMoved = true;
-            Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
             ChessSquare activeSquareInBoard = FindActiveSquare();
+            //Check if the king is castling
+            if (ActiveSquare.Piece.Name == "king" && currentSquare.SquareWithRookToCastle != null)
+            {
+                int[] rookLocation = _squareLocations[currentSquare.SquareWithRookToCastle.Key];
+                ChessPiece rookToMove = Board[rookLocation[0]][rookLocation[1]].Piece;
+                rookToMove.HasMoved = true;
+                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = rookToMove;
+                Board[rookLocation[0]][rookLocation[1]].Piece = ActiveSquare.Piece;
+            }
+            else
+            {
+                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
+            }
+
 
             activeSquareInBoard.Piece = null;
             activeSquareInBoard.IsActive = false;
@@ -337,6 +403,10 @@ namespace idiot_chess.Models
                 {
                     Board[i][j].IsActive = false;
                     Board[i][j].CanMoveTo = false;
+                    Board[i][j].EnPassantPieceSquare = null;
+                    Board[i][j].SquareWithRookToCastle = null;
+                    Board[i][j].UnderThreatFromBlack = null;
+                    Board[i][j].UnderThreatFromWhite = null;
                 }
             }
         }

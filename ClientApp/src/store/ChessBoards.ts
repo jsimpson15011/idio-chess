@@ -15,9 +15,10 @@ export type ChessBoardSquare = {
     key: string,
     isActive: boolean,
     canMoveTo: boolean,
-    underThreatFrom: ChessPiece,
-    enPassantPiece: ChessPiece,
-    rookToCastle: ChessPiece
+    underThreatFromWhite: ChessBoardSquare[]|null,
+    underThreatFromBlack: ChessBoardSquare[]|null,
+    enPassantPiece: ChessBoardSquare|null,
+    rookToCastle: ChessBoardSquare|null
 }
 
 export type Player = {
