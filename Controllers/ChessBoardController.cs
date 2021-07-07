@@ -28,7 +28,7 @@ namespace idiot_chess.Controllers
             {
                 ChessBoard board = body.Board;
                 ChessSquare currentSquare = body.CurrentSquare;
-
+                
                 if (currentSquare == null)
                 {
                     return CreatedAtAction("UpdateBoard", board, board);

@@ -117,9 +117,14 @@ namespace idiot_chess.Models
             ChessPiece piece = square.Piece;
             int[] pieceLocation = _squareLocations[square.Key];
 
+            if (piece == null)
+            {
+                return solution;
+            }
+
             if (piece.Name == "pawn")
             {
-                int pawnMovementDirection = ActivePlayer.Color == Player1.Color ? -1 : 1;
+                int pawnMovementDirection = piece.Color == Player1.Color ? -1 : 1;
 
                 if (Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1]].Piece == null)
                 {
@@ -136,7 +141,7 @@ namespace idiot_chess.Models
                     pieceLocation[1] > 0 &&
                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1].Piece != null &&
                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1]?.Piece.Color !=
-                    ActivePlayer.Color)
+                    piece.Color)
                 {
                     solution.Add(new[] {pieceLocation[0] + pawnMovementDirection, pieceLocation[1] - 1});
                 }
@@ -145,7 +150,7 @@ namespace idiot_chess.Models
                     pieceLocation[1] < 7 &&
                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1].Piece != null &&
                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1]?.Piece.Color !=
-                    ActivePlayer.Color)
+                    piece.Color)
                 {
                     solution.Add(new[] {pieceLocation[0] + pawnMovementDirection, pieceLocation[1] + 1});
                 }
@@ -216,19 +221,19 @@ namespace idiot_chess.Models
                 if (piece.HasMoved == false)
                 {
                     if (Board[pieceLocation[0]][pieceLocation[1] - 1].Piece == null &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 1].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] - 1].UnderThreatFromWhite == null) &&
                         Board[pieceLocation[0]][pieceLocation[1] - 2].Piece == null &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 2].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] - 2].UnderThreatFromWhite == null) &&
                         Board[pieceLocation[0]][pieceLocation[1] - 3].Piece == null &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 3].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] - 3].UnderThreatFromWhite == null) &&
                         Board[pieceLocation[0]][pieceLocation[1] - 4].Piece?.HasMoved == false &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromWhite == null)
                     )
@@ -241,15 +246,15 @@ namespace idiot_chess.Models
                     }
 
                     if (Board[pieceLocation[0]][pieceLocation[1] + 1].Piece == null &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] + 1].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] + 1].UnderThreatFromWhite == null) &&
                         Board[pieceLocation[0]][pieceLocation[1] + 2].Piece == null &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] + 2].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] + 2].UnderThreatFromWhite == null) &&
                         Board[pieceLocation[0]][pieceLocation[1] + 3].Piece?.HasMoved == false &&
-                        (ActivePlayer.Color == "white"
+                        (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromWhite == null)
                     )
@@ -300,7 +305,7 @@ namespace idiot_chess.Models
             foreach (int[] location in solution.ToList())
             {
                 if (Board[location[0]][location[1]].Piece?.Color ==
-                    ActivePlayer.Color) //remove possible moves if they land on your own piece
+                    piece.Color) //remove possible moves if they land on the same color piece
                 {
                     solution.Remove(location);
                 }
@@ -351,9 +356,66 @@ namespace idiot_chess.Models
             return new ChessSquare("xx");
         }
 
+        public Dictionary<string, List<ChessSquare>> FindThreats(ChessSquare currentSquare)
+        {
+            
+            Dictionary<string, List<ChessSquare>> solution = new Dictionary<string, List<ChessSquare>>
+            {
+                {"white", new List<ChessSquare>()}, {"black", new List<ChessSquare>()}
+            };
+
+            int[] currentSquareLocation = _squareLocations[currentSquare.Key];
+
+            foreach (var row in Board)
+            {
+                foreach (var currentThreat in row)
+                {
+                    if (currentThreat.Piece != null)
+                    {
+                        if (currentThreat.Piece?.Name ==
+                            "pawn") //if the piece is a pawn it's attacks may not be it's moves
+                        {
+                            int pawnMovementDirection = currentThreat.Piece?.Color == Player1.Color ? -1 : 1;
+                            int[] currentThreatLocation = _squareLocations[currentThreat.Key];
+                            List<int[]> currentThreatMoves = new List<int[]>();
+                            currentThreatMoves.Add(new []{currentThreatLocation[0]+pawnMovementDirection, currentThreatLocation[1]-1});
+                            currentThreatMoves.Add(new []{currentThreatLocation[0]+pawnMovementDirection, currentThreatLocation[1]+1});
+
+                            foreach (var currentThreatMove in currentThreatMoves)
+                            {
+                                if (currentThreatMove.SequenceEqual(currentSquareLocation))
+                                {
+                                    solution[currentThreat.Piece?.Color == "white" ? "white" : "black"]
+                                        .Add(Board[currentThreatLocation[0]][currentThreatLocation[1]]);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            int[] currentThreatLocation = _squareLocations[currentThreat.Key];
+                            List<int[]> currentThreatMoves = FindMoves(currentThreat);
+
+                            foreach (int[] currentThreatMove in currentThreatMoves)
+                            {
+                                if (currentThreatMove.SequenceEqual(currentSquareLocation))
+                                {
+                                    solution[currentThreat.Piece?.Color == "white" ? "white" : "black"]
+                                        .Add(Board[currentThreatLocation[0]][currentThreatLocation[1]]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return solution;
+        }
+
         private void FindMovesFromDirection(IReadOnlyList<int> pieceLocation, ICollection<int[]> solution,
             int[] direction)
         {
+            ChessSquare currentSquare = Board[pieceLocation[0]][pieceLocation[1]];
+            ChessPiece piece = currentSquare.Piece;
             int[] possibleMove = {pieceLocation[0] + direction[0], pieceLocation[1] + direction[1]};
 
             if ((direction[0] != 1 && direction[0] != 0 && pieceLocation[0] <= 0) ||
@@ -370,14 +432,14 @@ namespace idiot_chess.Models
                    (direction[0] == -1 || direction[0] == 0 || possibleMove[0] <= Board.Length - 1) &&
                    (direction[1] == 1 || direction[1] == 0 || possibleMove[1] >= 0) &&
                    (direction[1] == -1 || direction[1] == 0 || possibleMove[1] <= Board.Length - 1) &&
-                   (squareToCheck.Piece == null || squareToCheck.Piece.Color != ActivePlayer.Color))
+                   (squareToCheck.Piece == null || squareToCheck.Piece.Color != piece.Color))
             {
-                if (squareToCheck.Piece == null || squareToCheck.Piece.Color != ActivePlayer.Color)
+                if (squareToCheck.Piece == null || squareToCheck.Piece.Color != piece.Color)
                 {
                     solution.Add(new int[] {possibleMove[0], possibleMove[1]});
                 }
 
-                if (squareToCheck.Piece != null && squareToCheck.Piece?.Color != ActivePlayer.Color)
+                if (squareToCheck.Piece != null && squareToCheck.Piece?.Color != piece.Color)
                 {
                     return;
                 }
