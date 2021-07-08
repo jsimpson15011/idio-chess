@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace idiot_chess.Models
@@ -9,15 +8,17 @@ namespace idiot_chess.Models
         public ChessBoard()
         {
             ChessSquare[][] initBoard = new ChessSquare[8][];
-            Dictionary<int, string> indexAlpha = new Dictionary<int, string>();
-            indexAlpha.Add(0, "a");
-            indexAlpha.Add(1, "b");
-            indexAlpha.Add(2, "c");
-            indexAlpha.Add(3, "d");
-            indexAlpha.Add(4, "e");
-            indexAlpha.Add(5, "f");
-            indexAlpha.Add(6, "g");
-            indexAlpha.Add(7, "h");
+            Dictionary<int, string> indexAlpha = new Dictionary<int, string>
+            {
+                {0, "a"},
+                {1, "b"},
+                {2, "c"},
+                {3, "d"},
+                {4, "e"},
+                {5, "f"},
+                {6, "g"},
+                {7, "h"}
+            };
             Dictionary<string, int[]> squareLocations = new Dictionary<string, int[]>();
 
             for (int i = 0; i < initBoard.Length; i++)
@@ -117,11 +118,10 @@ namespace idiot_chess.Models
                 {
                     Board[move[0]][move[1]].CanMoveTo = true;
                 }
-                
             }
         }
 
-        public List<int[]> FindMoves(ChessSquare square)
+        public List<int[]> FindMoves(ChessSquare square, bool isThreatMoves = false)
         {
             List<int[]> solution = new List<int[]>();
             ChessPiece piece = square.Piece;
@@ -168,18 +168,18 @@ namespace idiot_chess.Models
 
             if (piece.Name == "bishop" || piece.Name == "queen")
             {
-                FindMovesFromDirection(pieceLocation, solution, new[] {-1, -1});
-                FindMovesFromDirection(pieceLocation, solution, new[] {-1, 1});
-                FindMovesFromDirection(pieceLocation, solution, new[] {1, -1});
-                FindMovesFromDirection(pieceLocation, solution, new[] {1, 1});
+                FindMovesFromDirection(pieceLocation, solution, new[] {-1, -1}, isThreatMoves);
+                FindMovesFromDirection(pieceLocation, solution, new[] {-1, 1}, isThreatMoves);
+                FindMovesFromDirection(pieceLocation, solution, new[] {1, -1}, isThreatMoves);
+                FindMovesFromDirection(pieceLocation, solution, new[] {1, 1}, isThreatMoves);
             }
 
             if (piece.Name == "rook" || piece.Name == "queen")
             {
-                FindMovesFromDirection(pieceLocation, solution, new[] {-1, 0});
-                FindMovesFromDirection(pieceLocation, solution, new[] {1, 0});
-                FindMovesFromDirection(pieceLocation, solution, new[] {0, -1});
-                FindMovesFromDirection(pieceLocation, solution, new[] {0, 1});
+                FindMovesFromDirection(pieceLocation, solution, new[] {-1, 0}, isThreatMoves);
+                FindMovesFromDirection(pieceLocation, solution, new[] {1, 0}, isThreatMoves);
+                FindMovesFromDirection(pieceLocation, solution, new[] {0, -1}, isThreatMoves);
+                FindMovesFromDirection(pieceLocation, solution, new[] {0, 1}, isThreatMoves);
             }
 
             if (piece.Name == "knight")
@@ -230,7 +230,10 @@ namespace idiot_chess.Models
                 //check for castling
                 if (piece.HasMoved == false)
                 {
-                    if (Board[pieceLocation[0]][pieceLocation[1] - 1].Piece == null &&
+                    if ((piece.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1]].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1]].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] - 1].Piece == null &&
                         (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 1].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] - 1].UnderThreatFromWhite == null) &&
@@ -255,7 +258,10 @@ namespace idiot_chess.Models
                             Board[pieceLocation[0]][pieceLocation[1] - 4];
                     }
 
-                    if (Board[pieceLocation[0]][pieceLocation[1] + 1].Piece == null &&
+                    if ((piece.Color == "white"
+                            ? Board[pieceLocation[0]][pieceLocation[1]].UnderThreatFromBlack == null
+                            : Board[pieceLocation[0]][pieceLocation[1]].UnderThreatFromWhite == null) &&
+                        Board[pieceLocation[0]][pieceLocation[1] + 1].Piece == null &&
                         (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] + 1].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] + 1].UnderThreatFromWhite == null) &&
@@ -318,7 +324,7 @@ namespace idiot_chess.Models
                 if ((piece.Color == "white"
                         ? Board[location[0]][location[1]].UnderThreatFromBlack != null
                         : Board[location[0]][location[1]].UnderThreatFromWhite != null) &&
-                    piece.Name == "king"
+                    piece.Name == "king" && !isThreatMoves
                 )
                 {
                     solution.Remove(location);
@@ -413,7 +419,7 @@ namespace idiot_chess.Models
                         else
                         {
                             int[] currentThreatLocation = _squareLocations[currentThreat.Key];
-                            List<int[]> currentThreatMoves = FindMoves(currentThreat);
+                            List<int[]> currentThreatMoves = FindMoves(currentThreat, true);
 
                             foreach (int[] currentThreatMove in currentThreatMoves)
                             {
@@ -440,7 +446,7 @@ namespace idiot_chess.Models
         }
 
         private void FindMovesFromDirection(IReadOnlyList<int> pieceLocation, ICollection<int[]> solution,
-            int[] direction)
+            int[] direction, bool isThreatMoves = false)
         {
             ChessSquare currentSquare = Board[pieceLocation[0]][pieceLocation[1]];
             ChessPiece piece = currentSquare.Piece;
@@ -462,12 +468,12 @@ namespace idiot_chess.Models
                    (direction[1] == -1 || direction[1] == 0 || possibleMove[1] <= Board.Length - 1)
             )
             {
-                if (squareToCheck.Piece == null || squareToCheck.Piece.Color != piece.Color)
+                if (squareToCheck.Piece == null || (isThreatMoves && squareToCheck.Piece.Name == "king"))
                 {
                     solution.Add(new int[] {possibleMove[0], possibleMove[1]});
                 }
 
-                if (squareToCheck.Piece != null)
+                else if (squareToCheck.Piece != null)
                 {
                     solution.Add(new int[] {possibleMove[0], possibleMove[1]});
                     return;
