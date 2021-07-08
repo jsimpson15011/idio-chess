@@ -356,12 +356,11 @@ namespace idiot_chess.Models
             return new ChessSquare("xx");
         }
 
-        public Dictionary<string, List<ChessSquare>> FindThreats(ChessSquare currentSquare)
+        public Dictionary<string, List<Threat>> FindThreats(ChessSquare currentSquare)
         {
-            
-            Dictionary<string, List<ChessSquare>> solution = new Dictionary<string, List<ChessSquare>>
+            Dictionary<string, List<Threat>> solution = new Dictionary<string, List<Threat>>
             {
-                {"white", new List<ChessSquare>()}, {"black", new List<ChessSquare>()}
+                {"white", new List<Threat>()}, {"black", new List<Threat>()}
             };
 
             int[] currentSquareLocation = _squareLocations[currentSquare.Key];
@@ -378,15 +377,21 @@ namespace idiot_chess.Models
                             int pawnMovementDirection = currentThreat.Piece?.Color == Player1.Color ? -1 : 1;
                             int[] currentThreatLocation = _squareLocations[currentThreat.Key];
                             List<int[]> currentThreatMoves = new List<int[]>();
-                            currentThreatMoves.Add(new []{currentThreatLocation[0]+pawnMovementDirection, currentThreatLocation[1]-1});
-                            currentThreatMoves.Add(new []{currentThreatLocation[0]+pawnMovementDirection, currentThreatLocation[1]+1});
+                            currentThreatMoves.Add(new[]
+                                {currentThreatLocation[0] + pawnMovementDirection, currentThreatLocation[1] - 1});
+                            currentThreatMoves.Add(new[]
+                                {currentThreatLocation[0] + pawnMovementDirection, currentThreatLocation[1] + 1});
 
                             foreach (var currentThreatMove in currentThreatMoves)
                             {
                                 if (currentThreatMove.SequenceEqual(currentSquareLocation))
                                 {
+                                    ChessSquare threatSquare =
+                                        Board[currentThreatLocation[0]][currentThreatLocation[1]];
+                                    
+                                    Threat threat = new Threat(threatSquare.Key, new ChessPiece(threatSquare.Piece.Color, threatSquare.Piece.Name));
                                     solution[currentThreat.Piece?.Color == "white" ? "white" : "black"]
-                                        .Add(Board[currentThreatLocation[0]][currentThreatLocation[1]]);
+                                        .Add(threat);
                                 }
                             }
                         }
@@ -399,14 +404,21 @@ namespace idiot_chess.Models
                             {
                                 if (currentThreatMove.SequenceEqual(currentSquareLocation))
                                 {
+                                    ChessSquare threatSquare =
+                                        Board[currentThreatLocation[0]][currentThreatLocation[1]];
+                                    
+                                    Threat threat = new Threat(threatSquare.Key, new ChessPiece(threatSquare.Piece.Color, threatSquare.Piece.Name));
                                     solution[currentThreat.Piece?.Color == "white" ? "white" : "black"]
-                                        .Add(Board[currentThreatLocation[0]][currentThreatLocation[1]]);
+                                        .Add(threat);
                                 }
                             }
                         }
                     }
                 }
             }
+
+            solution["white"] = solution["white"].Count > 0 ? solution["white"] : null;
+            solution["black"] = solution["black"].Count > 0 ? solution["black"] : null;
 
             return solution;
         }
@@ -467,8 +479,23 @@ namespace idiot_chess.Models
                     Board[i][j].CanMoveTo = false;
                     Board[i][j].EnPassantPieceSquare = null;
                     Board[i][j].SquareWithRookToCastle = null;
-                    Board[i][j].UnderThreatFromBlack = null;
-                    Board[i][j].UnderThreatFromWhite = null;
+                    /*Board[i][j].UnderThreatFromBlack = null;
+                    Board[i][j].UnderThreatFromWhite = null;*/
+                }
+            }
+        }
+
+        public void AddAllThreats()
+        {
+            foreach (ChessSquare[] row in Board)
+            {
+                foreach (ChessSquare square in row)
+                {
+                    int[] squareLocation = _squareLocations[square.Key];
+                    List<Threat> whiteThreats = FindThreats(square)["white"];
+                    List<Threat> blackThreats = FindThreats(square)["black"];
+                    Board[squareLocation[0]][squareLocation[1]].UnderThreatFromBlack = blackThreats;
+                    Board[squareLocation[0]][squareLocation[1]].UnderThreatFromWhite = whiteThreats;
                 }
             }
         }

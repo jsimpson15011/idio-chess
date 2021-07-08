@@ -37,9 +37,9 @@ namespace idiot_chess.Models
         
         public bool CanMoveTo { get; set; }
         
-        public List<ChessSquare> UnderThreatFromWhite { get; set; }
+        public List<Threat> UnderThreatFromWhite { get; set; }
         
-        public List<ChessSquare> UnderThreatFromBlack { get; set; }
+        public List<Threat> UnderThreatFromBlack { get; set; }
         
         public ChessSquare EnPassantPieceSquare { get; set; }
         

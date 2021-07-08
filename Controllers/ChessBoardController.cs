@@ -43,6 +43,7 @@ namespace idiot_chess.Controllers
                 if (currentSquare?.CanMoveTo == true)
                 {
                     board.Move(currentSquare);
+                    board.AddAllThreats();
                     board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
                 }
 
