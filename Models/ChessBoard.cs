@@ -106,8 +106,18 @@ namespace idiot_chess.Models
 
                 foreach (int[] move in possibleMoves.ToList())
                 {
+                    if (Board[move[0]][move[1]].Piece?.Color ==
+                        activeSquare.Piece.Color) //remove possible moves if they land on the same color piece
+                    {
+                        possibleMoves.Remove(move);
+                    }
+                }
+
+                foreach (int[] move in possibleMoves.ToList())
+                {
                     Board[move[0]][move[1]].CanMoveTo = true;
                 }
+                
             }
         }
 
@@ -304,8 +314,12 @@ namespace idiot_chess.Models
 
             foreach (int[] location in solution.ToList())
             {
-                if (Board[location[0]][location[1]].Piece?.Color ==
-                    piece.Color) //remove possible moves if they land on the same color piece
+                //remove moves that put king into check
+                if ((piece.Color == "white"
+                        ? Board[location[0]][location[1]].UnderThreatFromBlack != null
+                        : Board[location[0]][location[1]].UnderThreatFromWhite != null) &&
+                    piece.Name == "king"
+                )
                 {
                     solution.Remove(location);
                 }
@@ -388,8 +402,9 @@ namespace idiot_chess.Models
                                 {
                                     ChessSquare threatSquare =
                                         Board[currentThreatLocation[0]][currentThreatLocation[1]];
-                                    
-                                    Threat threat = new Threat(threatSquare.Key, new ChessPiece(threatSquare.Piece.Color, threatSquare.Piece.Name));
+
+                                    Threat threat = new Threat(threatSquare.Key,
+                                        new ChessPiece(threatSquare.Piece.Color, threatSquare.Piece.Name));
                                     solution[currentThreat.Piece?.Color == "white" ? "white" : "black"]
                                         .Add(threat);
                                 }
@@ -406,8 +421,9 @@ namespace idiot_chess.Models
                                 {
                                     ChessSquare threatSquare =
                                         Board[currentThreatLocation[0]][currentThreatLocation[1]];
-                                    
-                                    Threat threat = new Threat(threatSquare.Key, new ChessPiece(threatSquare.Piece.Color, threatSquare.Piece.Name));
+
+                                    Threat threat = new Threat(threatSquare.Key,
+                                        new ChessPiece(threatSquare.Piece.Color, threatSquare.Piece.Name));
                                     solution[currentThreat.Piece?.Color == "white" ? "white" : "black"]
                                         .Add(threat);
                                 }
@@ -443,16 +459,17 @@ namespace idiot_chess.Models
             while ((direction[0] == 1 || direction[0] == 0 || possibleMove[0] >= 0) &&
                    (direction[0] == -1 || direction[0] == 0 || possibleMove[0] <= Board.Length - 1) &&
                    (direction[1] == 1 || direction[1] == 0 || possibleMove[1] >= 0) &&
-                   (direction[1] == -1 || direction[1] == 0 || possibleMove[1] <= Board.Length - 1) &&
-                   (squareToCheck.Piece == null || squareToCheck.Piece.Color != piece.Color))
+                   (direction[1] == -1 || direction[1] == 0 || possibleMove[1] <= Board.Length - 1)
+            )
             {
                 if (squareToCheck.Piece == null || squareToCheck.Piece.Color != piece.Color)
                 {
                     solution.Add(new int[] {possibleMove[0], possibleMove[1]});
                 }
 
-                if (squareToCheck.Piece != null && squareToCheck.Piece?.Color != piece.Color)
+                if (squareToCheck.Piece != null)
                 {
+                    solution.Add(new int[] {possibleMove[0], possibleMove[1]});
                     return;
                 }
 
