@@ -251,10 +251,10 @@ namespace idiot_chess.Models
                             : Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromWhite == null)
                     )
                     {
-                        int[] castlingMove = {pieceLocation[0], pieceLocation[1] - 3};
+                        int[] castlingMove = {pieceLocation[0], pieceLocation[1] - 2};
                         solution.Add(castlingMove);
 
-                        Board[pieceLocation[0]][pieceLocation[1] - 3].SquareWithRookToCastle =
+                        Board[pieceLocation[0]][pieceLocation[1] - 2].SquareWithRookToCastle =
                             Board[pieceLocation[0]][pieceLocation[1] - 4];
                     }
 
@@ -337,16 +337,20 @@ namespace idiot_chess.Models
         public void Move(ChessSquare currentSquare)
         {
             int[] currentSquareLocation = _squareLocations[currentSquare.Key];
+            int[] activeSquareLocation = _squareLocations[ActiveSquare.Key];
             ActiveSquare.Piece.HasMoved = true;
             ChessSquare activeSquareInBoard = FindActiveSquare();
             //Check if the king is castling
             if (ActiveSquare.Piece.Name == "king" && currentSquare.SquareWithRookToCastle != null)
             {
+                int kingMovementDirection = currentSquareLocation[1] - activeSquareLocation[1] > 0 ? -1 : 1;
+                
                 int[] rookLocation = _squareLocations[currentSquare.SquareWithRookToCastle.Key];
                 ChessPiece rookToMove = Board[rookLocation[0]][rookLocation[1]].Piece;
                 rookToMove.HasMoved = true;
-                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = rookToMove;
-                Board[rookLocation[0]][rookLocation[1]].Piece = ActiveSquare.Piece;
+                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
+                Board[currentSquareLocation[0]][currentSquareLocation[1]+kingMovementDirection].Piece = rookToMove;
+                Board[rookLocation[0]][rookLocation[1]].Piece = null;
             }
             else
             {
