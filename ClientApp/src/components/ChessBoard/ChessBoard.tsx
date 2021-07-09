@@ -1,7 +1,5 @@
 ﻿import * as React from 'react';
 import {connect} from 'react-redux';
-import {RouteComponentProps} from 'react-router';
-import {Link} from 'react-router-dom';
 import {ApplicationState} from '../../store';
 import * as BoardStore from '../../store/ChessBoards';
 import {useEffect} from "react";
@@ -36,7 +34,7 @@ const ChessBoard = (props: ChessBoardProps) => {
         }
 
         const updatedGameState: UpdateBoardModel = {
-            board: {            
+            board: {
                 board: props.board,
                 player1: humanPlayer.color == "white" ? humanPlayer : computerPlayer,
                 player2: humanPlayer.color == "white" ? computerPlayer : humanPlayer,
@@ -60,7 +58,7 @@ const ChessBoard = (props: ChessBoardProps) => {
             },
             currentSquare: square
         }
-        
+
         console.log(UpdatedGameState);
 
         props.updateBoard(UpdatedGameState);
@@ -87,8 +85,7 @@ const ChessBoard = (props: ChessBoardProps) => {
         );
     }
     return (
-        <div>
-            <h1>Future Chess Board</h1>
+        <div className="board">
             {props.board.map(row => {
                 return (
                     <div className="board__row" key={row[0].key[0]}>
