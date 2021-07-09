@@ -79,7 +79,30 @@ namespace idiot_chess.Models
 
         public ChessBoard(ChessSquare[][] board)
         {
-            Board = board;
+            ChessSquare[][] newBoard = new ChessSquare[8][];
+
+            for (int i = 0; i < newBoard.Length; i++)
+            {
+                newBoard[i] = new ChessSquare[8];
+
+                for (int j = 0; j < newBoard[i].Length; j++)
+                {
+                    ChessSquare oldSquare = board[i][j];
+
+                    if (oldSquare.Piece == null)
+                    {
+                        newBoard[i][j] = new ChessSquare(oldSquare.Key);
+                    }
+                    else
+                    {
+                        newBoard[i][j] = new ChessSquare(oldSquare.Key,
+                            new ChessPiece(oldSquare.Piece.Color, oldSquare.Piece.Name));
+                    }
+                }
+            }
+
+
+            Board = newBoard;
         }
 
         public ChessSquare[][] Board { get; set; }
@@ -344,12 +367,12 @@ namespace idiot_chess.Models
             if (ActiveSquare.Piece.Name == "king" && currentSquare.SquareWithRookToCastle != null)
             {
                 int kingMovementDirection = currentSquareLocation[1] - activeSquareLocation[1] > 0 ? -1 : 1;
-                
+
                 int[] rookLocation = _squareLocations[currentSquare.SquareWithRookToCastle.Key];
                 ChessPiece rookToMove = Board[rookLocation[0]][rookLocation[1]].Piece;
                 rookToMove.HasMoved = true;
                 Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
-                Board[currentSquareLocation[0]][currentSquareLocation[1]+kingMovementDirection].Piece = rookToMove;
+                Board[currentSquareLocation[0]][currentSquareLocation[1] + kingMovementDirection].Piece = rookToMove;
                 Board[rookLocation[0]][rookLocation[1]].Piece = null;
             }
             else
@@ -525,6 +548,28 @@ namespace idiot_chess.Models
                     Board[squareLocation[0]][squareLocation[1]].UnderThreatFromWhite = whiteThreats;
                 }
             }
+        }
+
+        public bool IsKingInCheck(string color)
+        {
+            ChessSquare kingSquare = null;
+            foreach (ChessSquare[] row in Board)
+            {
+                foreach (ChessSquare square in row)
+                {
+                    if (square.Piece?.Name == "king" && square.Piece?.Color == color)
+                    {
+                        kingSquare = square;
+                    }
+                }
+            }
+
+            if (color == "white")
+            {
+                return kingSquare?.UnderThreatFromBlack != null;
+            }
+
+            return kingSquare?.UnderThreatFromWhite != null;
         }
     }
 }
