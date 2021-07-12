@@ -77,7 +77,7 @@ namespace idiot_chess.Models
             Board = initBoard;
         }
 
-        public ChessBoard(ChessSquare[][] board)
+        public ChessBoard(ChessBoard chessBoard)
         {
             ChessSquare[][] newBoard = new ChessSquare[8][];
 
@@ -87,7 +87,7 @@ namespace idiot_chess.Models
 
                 for (int j = 0; j < newBoard[i].Length; j++)
                 {
-                    ChessSquare oldSquare = board[i][j];
+                    ChessSquare oldSquare = chessBoard.Board[i][j];
 
                     if (oldSquare.Piece == null)
                     {
@@ -96,13 +96,42 @@ namespace idiot_chess.Models
                     else
                     {
                         newBoard[i][j] = new ChessSquare(oldSquare.Key,
-                            new ChessPiece(oldSquare.Piece.Color, oldSquare.Piece.Name));
+                            new ChessPiece(oldSquare.Piece.Color, oldSquare.Piece.Name, oldSquare.Piece.HasMoved));
                     }
                 }
             }
 
+            Dictionary<int, string> indexAlpha = new Dictionary<int, string>
+            {
+                {0, "a"},
+                {1, "b"},
+                {2, "c"},
+                {3, "d"},
+                {4, "e"},
+                {5, "f"},
+                {6, "g"},
+                {7, "h"}
+            };
+
+            Dictionary<string, int[]> squareLocations = new Dictionary<string, int[]>();
+
+            for (int i = 0; i < newBoard.Length; i++)
+            {
+                for (int j = 0; j < newBoard[i].Length; j++)
+                {
+                    string key = (8 - i) + indexAlpha[j];
+
+                    squareLocations.Add(key, new[] {i, j});
+                }
+            }
+
+            _squareLocations = squareLocations;
 
             Board = newBoard;
+            ActivePlayer = chessBoard.ActivePlayer;
+            ActiveSquare = chessBoard.ActiveSquare;
+            Player1 = chessBoard.Player1;
+            Player2 = chessBoard.Player2;
         }
 
         public ChessSquare[][] Board { get; set; }
@@ -343,14 +372,23 @@ namespace idiot_chess.Models
 
             foreach (int[] location in solution.ToList())
             {
-                //remove moves that put king into check
-                if ((piece.Color == "white"
-                        ? Board[location[0]][location[1]].UnderThreatFromBlack != null
-                        : Board[location[0]][location[1]].UnderThreatFromWhite != null) &&
-                    piece.Name == "king" && !isThreatMoves
-                )
+                if (!isThreatMoves)
                 {
-                    solution.Remove(location);
+                    ChessBoard tmpBoard = new ChessBoard(this);
+
+                    tmpBoard.ActiveSquare = tmpBoard.Board[pieceLocation[0]][pieceLocation[1]];
+
+                    tmpBoard.Move(tmpBoard.Board[location[0]][location[1]]);
+
+                    tmpBoard.AddAllThreats();
+
+                    bool movePutsKingInCheck = tmpBoard.IsKingInCheck(piece.Color);
+
+                    //remove moves that put king into check
+                    if (movePutsKingInCheck)
+                    {
+                        solution.Remove(location);
+                    }
                 }
             }
 

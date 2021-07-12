@@ -60,7 +60,7 @@ namespace idiot_chess.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw new Exception("Didn't work");
+                throw new Exception(e.Message);
             }
         }
     }

@@ -22,6 +22,22 @@ namespace idiot_chess.Models
             Value = pieceValues[name];
         }
 
+        public ChessPiece(string color, string name, bool hasMoved)
+        {
+            Dictionary<string, int> pieceValues = new Dictionary<string, int>();
+            pieceValues.TryAdd("pawn", 1);
+            pieceValues.TryAdd("knight", 3);
+            pieceValues.TryAdd("bishop", 3);
+            pieceValues.TryAdd("rook", 5);
+            pieceValues.TryAdd("queen", 9);
+            pieceValues.TryAdd("king", 9999);
+
+            Name = name;
+            Color = color;
+            Value = pieceValues[name];
+            HasMoved = hasMoved;
+        }
+
 
 
 
