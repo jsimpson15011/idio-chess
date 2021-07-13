@@ -400,7 +400,7 @@ namespace idiot_chess.Models
             int[] currentSquareLocation = _squareLocations[currentSquare.Key];
             int[] activeSquareLocation = _squareLocations[ActiveSquare.Key];
             ActiveSquare.Piece.HasMoved = true;
-            ChessSquare activeSquareInBoard = FindActiveSquare();
+            ChessSquare activeSquareInBoard = Board[activeSquareLocation[0]][activeSquareLocation[1]];
             //Check if the king is castling
             if (ActiveSquare.Piece.Name == "king" && currentSquare.SquareWithRookToCastle != null)
             {
@@ -423,22 +423,6 @@ namespace idiot_chess.Models
             activeSquareInBoard.IsActive = false;
             ActiveSquare = null;
             ClearAllSquareStatus();
-        }
-
-        public ChessSquare FindActiveSquare()
-        {
-            for (int i = 0; i < Board.Length; i++)
-            {
-                for (int j = 0; j < Board[i].Length; j++)
-                {
-                    if (Board[i][j].IsActive)
-                    {
-                        return Board[i][j];
-                    }
-                }
-            }
-
-            return new ChessSquare("xx");
         }
 
         public Dictionary<string, List<Threat>> FindThreats(ChessSquare currentSquare)
@@ -533,7 +517,7 @@ namespace idiot_chess.Models
                    (direction[1] == -1 || direction[1] == 0 || possibleMove[1] <= Board.Length - 1)
             )
             {
-                if (squareToCheck.Piece == null || (isThreatMoves && squareToCheck.Piece.Name == "king"))
+                if (squareToCheck.Piece == null)
                 {
                     solution.Add(new int[] {possibleMove[0], possibleMove[1]});
                 }
