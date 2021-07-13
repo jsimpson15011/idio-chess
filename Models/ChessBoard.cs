@@ -307,10 +307,10 @@ namespace idiot_chess.Models
                         (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 3].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] - 3].UnderThreatFromWhite == null) &&
-                        Board[pieceLocation[0]][pieceLocation[1] - 4].Piece?.HasMoved == false &&
+                        Board[pieceLocation[0]][pieceLocation[1] - 4].Piece?.HasMoved == false /*&&
                         (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromBlack == null
-                            : Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromWhite == null)
+                            : Board[pieceLocation[0]][pieceLocation[1] - 4].UnderThreatFromWhite == null)*/
                     )
                     {
                         int[] castlingMove = {pieceLocation[0], pieceLocation[1] - 2};
@@ -331,10 +331,10 @@ namespace idiot_chess.Models
                         (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] + 2].UnderThreatFromBlack == null
                             : Board[pieceLocation[0]][pieceLocation[1] + 2].UnderThreatFromWhite == null) &&
-                        Board[pieceLocation[0]][pieceLocation[1] + 3].Piece?.HasMoved == false &&
+                        Board[pieceLocation[0]][pieceLocation[1] + 3].Piece?.HasMoved == false /*&&
                         (piece.Color == "white"
                             ? Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromBlack == null
-                            : Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromWhite == null)
+                            : Board[pieceLocation[0]][pieceLocation[1] + 3].UnderThreatFromWhite == null)*/
                     )
                     {
                         int[] castlingMove = {pieceLocation[0], pieceLocation[1] + 2};
