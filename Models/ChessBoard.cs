@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace idiot_chess.Models
@@ -199,20 +200,29 @@ namespace idiot_chess.Models
                 }
 
                 //The following adds the pawns attack moves
-                if (pieceLocation[0] < 7 &&
-                    pieceLocation[1] > 0 &&
-                    Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1].Piece != null &&
-                    Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1]?.Piece.Color !=
-                    piece.Color)
+                if (pieceLocation[0] < 7 && pieceLocation[1] > 0 &&
+                    (Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1].Piece != null &&
+                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1]?.Piece.Color !=
+                     piece.Color ||
+                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1].EnPassantPieceSquare !=
+                     null &&
+                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] - 1].EnPassantPieceSquare.Piece
+                         ?.Color != piece.Color)
+                )
                 {
                     solution.Add(new[] {pieceLocation[0] + pawnMovementDirection, pieceLocation[1] - 1});
                 }
 
-                if (pieceLocation[0] < 7 &&
-                    pieceLocation[1] < 7 &&
-                    Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1].Piece != null &&
-                    Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1]?.Piece.Color !=
-                    piece.Color)
+                if (pieceLocation[0] < 7 && pieceLocation[1] < 7 &&
+                    (Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1].Piece != null &&
+                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1]?.Piece.Color !=
+                     piece.Color
+                     || Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1].EnPassantPieceSquare !=
+                     null &&
+                     Board[pieceLocation[0] + pawnMovementDirection][pieceLocation[1] + 1].EnPassantPieceSquare.Piece
+                         ?.Color != piece.Color
+                    )
+                )
                 {
                     solution.Add(new[] {pieceLocation[0] + pawnMovementDirection, pieceLocation[1] + 1});
                 }
@@ -418,11 +428,35 @@ namespace idiot_chess.Models
                 Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
             }
 
+            if (ActiveSquare.Piece.Name == "pawn" && currentSquare.EnPassantPieceSquare != null)
+            {
+                int[] enPassantPieceLocation = _squareLocations[currentSquare.EnPassantPieceSquare.Key];
+                Board[enPassantPieceLocation[0]][enPassantPieceLocation[1]].Piece = null;
+            }
 
-            activeSquareInBoard.Piece = null;
-            activeSquareInBoard.IsActive = false;
-            ActiveSquare = null;
-            ClearAllSquareStatus();
+
+            //keep track of square that is enpassant
+            if (ActiveSquare.Piece.Name == "pawn" &&
+                Math.Abs(currentSquareLocation[0] - activeSquareLocation[0]) > 1)
+            {
+                ClearAllSquareStatus();
+                ClearEnPassantSquares();
+                int pawnDirection = ActiveSquare.Piece.Color == Player1.Color ? 1 : -1;
+
+                Board[currentSquareLocation[0] + pawnDirection][currentSquareLocation[1]].EnPassantPieceSquare =
+                    Board[currentSquareLocation[0]][currentSquareLocation[1]];
+                activeSquareInBoard.Piece = null;
+                activeSquareInBoard.IsActive = false;
+                ActiveSquare = null;
+            }
+            else
+            {
+                activeSquareInBoard.Piece = null;
+                activeSquareInBoard.IsActive = false;
+                ActiveSquare = null;
+                ClearAllSquareStatus();
+                ClearEnPassantSquares();
+            }
         }
 
         public Dictionary<string, List<Threat>> FindThreats(ChessSquare currentSquare)
@@ -549,10 +583,18 @@ namespace idiot_chess.Models
                 {
                     Board[i][j].IsActive = false;
                     Board[i][j].CanMoveTo = false;
-                    Board[i][j].EnPassantPieceSquare = null;
                     Board[i][j].SquareWithRookToCastle = null;
-                    /*Board[i][j].UnderThreatFromBlack = null;
-                    Board[i][j].UnderThreatFromWhite = null;*/
+                }
+            }
+        }
+
+        public void ClearEnPassantSquares()
+        {
+            for (int i = 0; i < Board.Length; i++)
+            {
+                for (int j = 0; j < Board[i].Length; j++)
+                {
+                    Board[i][j].EnPassantPieceSquare = null;
                 }
             }
         }
