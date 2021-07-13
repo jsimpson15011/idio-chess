@@ -4,7 +4,7 @@ import {AppThunkAction} from './';
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
 
-type ChessPiece = {
+export type ChessPiece = {
     color: string,
     name: string,
     value: number
@@ -34,6 +34,7 @@ export interface GameState {
     activePlayer: Player|null;
     player1: Player|null;
     player2: Player|null;
+    pawnToUpgrade: ChessBoardSquare|null;
 }
 
 export interface UpdateBoardModel {
@@ -110,7 +111,7 @@ export const actionCreators = {
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
 const unloadedState: GameState = 
-    {board: [], activeSquare: null, activePlayer: null, player1: null, player2: null, isLoading: false};
+    {board: [], activeSquare: null, activePlayer: null, player1: null, player2: null, isLoading: false, pawnToUpgrade: null};
 
 export const reducer: Reducer<GameState> = (state: GameState | undefined, incomingAction: Action): GameState => {
     if (state === undefined) {

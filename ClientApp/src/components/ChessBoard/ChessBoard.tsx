@@ -4,7 +4,7 @@ import {ApplicationState} from '../../store';
 import * as BoardStore from '../../store/ChessBoards';
 import {useEffect} from "react";
 import './ChessBoard.css';
-import {GameState, Player, UpdateBoardModel} from "../../store/ChessBoards";
+import {ChessPiece, GameState, Player, UpdateBoardModel} from "../../store/ChessBoards";
 
 // At runtime, Redux will merge together...
 type ChessBoardProps =
@@ -39,7 +39,8 @@ const ChessBoard = (props: ChessBoardProps) => {
                 player1: humanPlayer.color == "white" ? humanPlayer : computerPlayer,
                 player2: humanPlayer.color == "white" ? computerPlayer : humanPlayer,
                 activePlayer: humanPlayer.color == "white" ? humanPlayer : computerPlayer,
-                activeSquare: props.activeSquare
+                activeSquare: props.activeSquare,
+                pawnToUpgrade: props.pawnToUpgrade
             },
             currentSquare: null
         }
@@ -54,15 +55,54 @@ const ChessBoard = (props: ChessBoardProps) => {
                 activeSquare: props.activeSquare,
                 player1: props.player1,
                 player2: props.player2,
-                activePlayer: props.activePlayer
+                activePlayer: props.activePlayer,
+                pawnToUpgrade: props.pawnToUpgrade
             },
             currentSquare: square
         }
 
-        console.log(UpdatedGameState);
+        props.updateBoard(UpdatedGameState);
+    }
+
+    const handlePromotion = (name: string) => {
+        if (props.pawnToUpgrade === null || props.activePlayer === null) return;
+
+        const pieceValues: Record<string, number> = {
+            queen: 9,
+            rook: 5,
+            bishop: 3,
+            knight: 3
+        }
+
+        const promotedPiece: ChessPiece = {
+            value: pieceValues[name],
+            name: name,
+            color: props.activePlayer.color
+        }
+        console.log(promotedPiece)
+
+        const updatedSquare: ChessBoardSquare = {
+            ...props.pawnToUpgrade,
+            piece: promotedPiece
+        }
+
+        console.log(updatedSquare)
+
+        const UpdatedGameState: UpdateBoardModel = {
+            board: {
+                board: props.board,
+                activeSquare: props.activeSquare,
+                player1: props.player1,
+                player2: props.player2,
+                activePlayer: props.activePlayer,
+                pawnToUpgrade: updatedSquare
+            },
+            currentSquare: null
+        }
 
         props.updateBoard(UpdatedGameState);
     }
+
 
     const activeStyles = {
         background: "#5ff0ff",
@@ -84,6 +124,18 @@ const ChessBoard = (props: ChessBoardProps) => {
             </div>
         );
     }
+
+    if (props.pawnToUpgrade != null) {
+        return (
+            <div className="piece-upgrade-menu">
+                <button onClick={() => handlePromotion("queen")}>Queen</button>
+                <button onClick={() => handlePromotion("rook")}>Rook</button>
+                <button onClick={() => handlePromotion("bishop")}>Bishop</button>
+                <button onClick={() => handlePromotion("knight")}>Knight</button>
+            </div>
+        )
+    }
+
     return (
         <div className="board">
             {props.board.map(row => {

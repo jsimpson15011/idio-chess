@@ -29,6 +29,13 @@ namespace idiot_chess.Controllers
                 ChessBoard board = body.Board;
                 ChessSquare currentSquare = body.CurrentSquare;
                 
+                if (board.PawnToUpgrade != null)
+                {
+                    board.SetSquareByKey(board.PawnToUpgrade.Key, board.PawnToUpgrade.Piece);
+                    board.PawnToUpgrade = null;
+                    board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
+                }
+                
                 if (currentSquare == null)
                 {
                     return CreatedAtAction("UpdateBoard", board, board);
@@ -40,11 +47,14 @@ namespace idiot_chess.Controllers
                     board.SetActiveSquare(body.CurrentSquare);
                 }
 
-                if (currentSquare?.CanMoveTo == true)
+                if (currentSquare.CanMoveTo)
                 {
                     board.Move(currentSquare);
                     board.AddAllThreats();
-                    board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
+                    if (board.PawnToUpgrade == null)
+                    {
+                        board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
+                    }
                 }
 
 
@@ -52,8 +62,8 @@ namespace idiot_chess.Controllers
                 {
                     
                 }*/
-                
-                
+
+
 
                 return CreatedAtAction("UpdateBoard", board, board);
             }

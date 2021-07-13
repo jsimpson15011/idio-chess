@@ -76,6 +76,7 @@ namespace idiot_chess.Models
 
 
             Board = initBoard;
+            PawnToUpgrade = null;
         }
 
         public ChessBoard(ChessBoard chessBoard)
@@ -133,6 +134,7 @@ namespace idiot_chess.Models
             ActiveSquare = chessBoard.ActiveSquare;
             Player1 = chessBoard.Player1;
             Player2 = chessBoard.Player2;
+            PawnToUpgrade = chessBoard.PawnToUpgrade;
         }
 
         public ChessSquare[][] Board { get; set; }
@@ -144,6 +146,8 @@ namespace idiot_chess.Models
         public Player Player1 { get; set; }
 
         public Player Player2 { get; set; }
+
+        public ChessSquare PawnToUpgrade { get; set; }
 
         private readonly Dictionary<string, int[]> _squareLocations = new Dictionary<string, int[]>();
 
@@ -405,59 +409,6 @@ namespace idiot_chess.Models
             return solution;
         }
 
-        public void Move(ChessSquare currentSquare)
-        {
-            int[] currentSquareLocation = _squareLocations[currentSquare.Key];
-            int[] activeSquareLocation = _squareLocations[ActiveSquare.Key];
-            ActiveSquare.Piece.HasMoved = true;
-            ChessSquare activeSquareInBoard = Board[activeSquareLocation[0]][activeSquareLocation[1]];
-            //Check if the king is castling
-            if (ActiveSquare.Piece.Name == "king" && currentSquare.SquareWithRookToCastle != null)
-            {
-                int kingMovementDirection = currentSquareLocation[1] - activeSquareLocation[1] > 0 ? -1 : 1;
-
-                int[] rookLocation = _squareLocations[currentSquare.SquareWithRookToCastle.Key];
-                ChessPiece rookToMove = Board[rookLocation[0]][rookLocation[1]].Piece;
-                rookToMove.HasMoved = true;
-                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
-                Board[currentSquareLocation[0]][currentSquareLocation[1] + kingMovementDirection].Piece = rookToMove;
-                Board[rookLocation[0]][rookLocation[1]].Piece = null;
-            }
-            else
-            {
-                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
-            }
-
-            if (ActiveSquare.Piece.Name == "pawn" && currentSquare.EnPassantPieceSquare != null)
-            {
-                int[] enPassantPieceLocation = _squareLocations[currentSquare.EnPassantPieceSquare.Key];
-                Board[enPassantPieceLocation[0]][enPassantPieceLocation[1]].Piece = null;
-            }
-
-
-            //keep track of square that is enpassant
-            if (ActiveSquare.Piece.Name == "pawn" &&
-                Math.Abs(currentSquareLocation[0] - activeSquareLocation[0]) > 1)
-            {
-                ClearAllSquareStatus();
-                ClearEnPassantSquares();
-                int pawnDirection = ActiveSquare.Piece.Color == Player1.Color ? 1 : -1;
-
-                Board[currentSquareLocation[0] + pawnDirection][currentSquareLocation[1]].EnPassantPieceSquare =
-                    Board[currentSquareLocation[0]][currentSquareLocation[1]];
-                activeSquareInBoard.Piece = null;
-                activeSquareInBoard.IsActive = false;
-                ActiveSquare = null;
-            }
-            else
-            {
-                activeSquareInBoard.Piece = null;
-                activeSquareInBoard.IsActive = false;
-                ActiveSquare = null;
-                ClearAllSquareStatus();
-                ClearEnPassantSquares();
-            }
-        }
 
         public Dictionary<string, List<Threat>> FindThreats(ChessSquare currentSquare)
         {
@@ -575,6 +526,65 @@ namespace idiot_chess.Models
             }
         }
 
+        public void Move(ChessSquare currentSquare)
+        {
+            int[] currentSquareLocation = _squareLocations[currentSquare.Key];
+            int[] activeSquareLocation = _squareLocations[ActiveSquare.Key];
+            ActiveSquare.Piece.HasMoved = true;
+            ChessSquare activeSquareInBoard = Board[activeSquareLocation[0]][activeSquareLocation[1]];
+            //Check if the king is castling
+            if (ActiveSquare.Piece.Name == "king" && currentSquare.SquareWithRookToCastle != null)
+            {
+                int kingMovementDirection = currentSquareLocation[1] - activeSquareLocation[1] > 0 ? -1 : 1;
+
+                int[] rookLocation = _squareLocations[currentSquare.SquareWithRookToCastle.Key];
+                ChessPiece rookToMove = Board[rookLocation[0]][rookLocation[1]].Piece;
+                rookToMove.HasMoved = true;
+                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
+                Board[currentSquareLocation[0]][currentSquareLocation[1] + kingMovementDirection].Piece = rookToMove;
+                Board[rookLocation[0]][rookLocation[1]].Piece = null;
+            }
+            else
+            {
+                Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = ActiveSquare.Piece;
+            }
+
+            if (ActiveSquare.Piece.Name == "pawn" && currentSquare.EnPassantPieceSquare != null)
+            {
+                int[] enPassantPieceLocation = _squareLocations[currentSquare.EnPassantPieceSquare.Key];
+                Board[enPassantPieceLocation[0]][enPassantPieceLocation[1]].Piece = null;
+            }
+
+            if (ActiveSquare != null && ActiveSquare.Piece.Name == "pawn" &&
+                (currentSquareLocation[0] == 0 || currentSquareLocation[0] == Board.Length - 1))
+            {
+                PawnToUpgrade = currentSquare;
+            }
+
+            //keep track of square that is enpassant
+            if (ActiveSquare.Piece.Name == "pawn" &&
+                Math.Abs(currentSquareLocation[0] - activeSquareLocation[0]) > 1)
+            {
+                ClearAllSquareStatus();
+                ClearEnPassantSquares();
+                int pawnDirection = ActiveSquare.Piece.Color == Player1.Color ? 1 : -1;
+
+                Board[currentSquareLocation[0] + pawnDirection][currentSquareLocation[1]].EnPassantPieceSquare =
+                    Board[currentSquareLocation[0]][currentSquareLocation[1]];
+                activeSquareInBoard.Piece = null;
+                activeSquareInBoard.IsActive = false;
+                ActiveSquare = null;
+            }
+            else
+            {
+                activeSquareInBoard.Piece = null;
+                activeSquareInBoard.IsActive = false;
+                ActiveSquare = null;
+                ClearAllSquareStatus();
+                ClearEnPassantSquares();
+            }
+        }
+
         public void ClearAllSquareStatus()
         {
             for (int i = 0; i < Board.Length; i++)
@@ -634,6 +644,13 @@ namespace idiot_chess.Models
             }
 
             return kingSquare?.UnderThreatFromWhite != null;
+        }
+
+        public void SetSquareByKey(string key, ChessPiece piece)
+        {
+            int[] currentSquareLocation = _squareLocations[key];
+
+            Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = piece;
         }
     }
 }
