@@ -164,15 +164,6 @@ namespace idiot_chess.Models
 
                 foreach (int[] move in possibleMoves.ToList())
                 {
-                    if (Board[move[0]][move[1]].Piece?.Color ==
-                        activeSquare.Piece.Color) //remove possible moves if they land on the same color piece
-                    {
-                        possibleMoves.Remove(move);
-                    }
-                }
-
-                foreach (int[] move in possibleMoves.ToList())
-                {
                     Board[move[0]][move[1]].CanMoveTo = true;
                 }
             }
@@ -400,6 +391,12 @@ namespace idiot_chess.Models
 
                     //remove moves that put king into check
                     if (movePutsKingInCheck)
+                    {
+                        solution.Remove(location);
+                    }
+
+                    if (Board[location[0]][location[1]].Piece?.Color ==
+                        ActivePlayer.Color) //remove possible moves if they land on the same color piece
                     {
                         solution.Remove(location);
                     }

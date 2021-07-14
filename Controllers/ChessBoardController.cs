@@ -28,7 +28,7 @@ namespace idiot_chess.Controllers
             {
                 ChessBoard board = body.Board;
                 ChessSquare currentSquare = body.CurrentSquare;
-                
+
                 if (board.PawnToUpgrade != null)
                 {
                     board.SetSquareByKey(board.PawnToUpgrade.Key, board.PawnToUpgrade.Piece);
@@ -63,6 +63,20 @@ namespace idiot_chess.Controllers
                     
                 }*/
 
+                
+                if (board.ActivePlayer.IsComputer)
+                {
+                    var allMoves = board.ActivePlayer.FindAllMoves(board);
+                    var random = new Random();
+                    int index = random.Next(allMoves.Count);
+                    board.SetActiveSquare(allMoves[index][0]);
+                    board.Move(allMoves[index][1]);
+                    board.AddAllThreats();
+                    if (board.PawnToUpgrade == null)
+                    {
+                        board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
+                    }
+                }
 
 
                 return CreatedAtAction("UpdateBoard", board, board);
