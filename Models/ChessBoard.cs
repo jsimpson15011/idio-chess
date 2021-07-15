@@ -555,7 +555,14 @@ namespace idiot_chess.Models
             if (ActiveSquare != null && ActiveSquare.Piece.Name == "pawn" &&
                 (currentSquareLocation[0] == 0 || currentSquareLocation[0] == Board.Length - 1))
             {
-                PawnToUpgrade = currentSquare;
+                if (!ActivePlayer.IsComputer)
+                {
+                    PawnToUpgrade = currentSquare;
+                }
+                else
+                {
+                    currentSquare.Piece = new ChessPiece(ActivePlayer.Color, "queen", true);
+                }
             }
 
             //keep track of square that is enpassant
