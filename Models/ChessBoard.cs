@@ -656,5 +656,55 @@ namespace idiot_chess.Models
 
             Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = piece;
         }
+
+        public char[][][] BoardToPieceTable()
+        {
+            char[][][] solution = new char[8][][];
+
+            for (int i = 0; i < Board.Length; i++)
+            {
+                solution[i] = new char[8][];
+                for (int j = 0; j < Board[i].Length; j++)
+                {
+                    if (Board[i][j].Piece == null)
+                    {
+                        solution[i][j] = new[] {'x'};
+                    }
+                    else
+                    {
+                        char[] nameArr = Board[i][j].Piece.Name.ToCharArray();
+                        char[] colorArr = Board[i][j].Piece.Color.ToCharArray();
+
+                        solution[i][j] = new[] {colorArr[0], nameArr[0], nameArr[1]};
+                    }
+                }
+            }
+
+            return solution;
+        }
+
+        public string BoardToPieceHash()
+        {
+            string solution = "";
+            foreach (ChessSquare[] row in Board)
+            {
+                foreach (ChessSquare square in row)
+                {
+                    if (square.Piece == null)
+                    {
+                        solution += "x";
+                    }
+                    else
+                    {
+                        char[] nameArr = square.Piece.Name.ToCharArray();
+                        char[] colorArr = square.Piece.Color.ToCharArray();
+
+                        solution += new String(new[] {colorArr[0], nameArr[0], nameArr[1]});
+                    }
+                }
+            }
+
+            return solution;
+        }
     }
 }
