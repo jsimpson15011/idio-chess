@@ -15,10 +15,10 @@ export type ChessBoardSquare = {
     key: string,
     isActive: boolean,
     canMoveTo: boolean,
-    underThreatFromWhite: ChessBoardSquare[]|null,
-    underThreatFromBlack: ChessBoardSquare[]|null,
-    enPassantPiece: ChessBoardSquare|null,
-    rookToCastle: ChessBoardSquare|null
+    underThreatFromWhite: ChessBoardSquare[] | null,
+    underThreatFromBlack: ChessBoardSquare[] | null,
+    enPassantPiece: ChessBoardSquare | null,
+    rookToCastle: ChessBoardSquare | null
 }
 
 export type Player = {
@@ -27,19 +27,25 @@ export type Player = {
     isActive: boolean
 }
 
-export interface GameState {
+export type GameState = {
+    state: string | null,
+    player: Player | null
+}
+
+export interface ChessBoardState {
     isLoading?: boolean;
     board: ChessBoardSquare[][];
-    activeSquare: ChessBoardSquare|null;
-    activePlayer: Player|null;
-    player1: Player|null;
-    player2: Player|null;
-    pawnToUpgrade: ChessBoardSquare|null;
+    activeSquare: ChessBoardSquare | null;
+    activePlayer: Player | null;
+    player1: Player | null;
+    player2: Player | null;
+    pawnToUpgrade: ChessBoardSquare | null;
+    gameState: GameState;
 }
 
 export interface UpdateBoardModel {
-    board: GameState;
-    currentSquare: ChessBoardSquare|null;
+    board: ChessBoardState;
+    currentSquare: ChessBoardSquare | null;
 }
 
 
@@ -53,12 +59,12 @@ interface RequestBoardAction {
 
 interface ReceiveBoardAction {
     type: 'RECEIVE_BOARD';
-    gameState: GameState;
+    gameState: ChessBoardState;
 }
 
 interface UpdateBoardAction {
     type: 'UPDATE_BOARD';
-    gameState: GameState;
+    gameState: ChessBoardState;
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
@@ -75,7 +81,7 @@ export const actionCreators = {
         const appState = getState();
         if (true) {
             fetch(`chessboard`)
-                .then(response => response.json() as Promise<GameState>)
+                .then(response => response.json() as Promise<ChessBoardState>)
                 .then(data => {
                     dispatch({type: 'RECEIVE_BOARD', gameState: data});
                 });
@@ -93,7 +99,7 @@ export const actionCreators = {
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => response.json() as Promise<GameState>)
+                .then(response => response.json() as Promise<ChessBoardState>)
                 .then(data => {
                     dispatch({type: 'UPDATE_BOARD', gameState: data});
                 });
@@ -110,10 +116,19 @@ export const actionCreators = {
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
-const unloadedState: GameState = 
-    {board: [], activeSquare: null, activePlayer: null, player1: null, player2: null, isLoading: false, pawnToUpgrade: null};
+const unloadedState: ChessBoardState =
+    {
+        board: [],
+        activeSquare: null,
+        activePlayer: null,
+        player1: null,
+        player2: null,
+        isLoading: false,
+        pawnToUpgrade: null,
+        gameState: {player: null, state: null}
+    };
 
-export const reducer: Reducer<GameState> = (state: GameState | undefined, incomingAction: Action): GameState => {
+export const reducer: Reducer<ChessBoardState> = (state: ChessBoardState | undefined, incomingAction: Action): ChessBoardState => {
     if (state === undefined) {
         return unloadedState;
     }

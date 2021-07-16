@@ -2,26 +2,29 @@
 import {connect} from 'react-redux';
 import {ApplicationState} from '../../store';
 import * as BoardStore from '../../store/ChessBoards';
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import './ChessBoard.css';
-import {ChessPiece, GameState, Player, UpdateBoardModel} from "../../store/ChessBoards";
+import {ChessPiece, ChessBoardState, Player, UpdateBoardModel} from "../../store/ChessBoards";
+import {Button, Modal, ModalBody, ModalFooter, ModalHeader} from "reactstrap";
 
 // At runtime, Redux will merge together...
 type ChessBoardProps =
-    BoardStore.GameState // ... state we've requested from the Redux store
+    BoardStore.ChessBoardState // ... state we've requested from the Redux store
     & typeof BoardStore.actionCreators // ... plus action creators we've requested
 
 type ChessBoardSquare =
     BoardStore.ChessBoardSquare
 
 
-const ChessBoard = (props: ChessBoardProps) => {
+const ChessPrompt = (props: any) => {
+
+    const [modalIsShowing, setModal] = useState(false);
 
     useEffect(() => {
-        props.requestBoard();
-    }, []);
+        setModal(isModalShowing);
+    }, [props.player1]);
 
-    const handleColorChoice = (color: string) => {
+    const handleColorChoice = async (color: string) => {
         const humanPlayer: Player = {
             isActive: color == "white",
             isComputer: false,
@@ -40,28 +43,13 @@ const ChessBoard = (props: ChessBoardProps) => {
                 player2: humanPlayer.color == "white" ? computerPlayer : humanPlayer,
                 activePlayer: humanPlayer.color == "white" ? humanPlayer : computerPlayer,
                 activeSquare: props.activeSquare,
-                pawnToUpgrade: props.pawnToUpgrade
+                pawnToUpgrade: props.pawnToUpgrade,
+                gameState: {state: null, player: null}
             },
             currentSquare: null
         }
 
         props.updateBoard(updatedGameState);
-    }
-
-    const handleClick = (square: ChessBoardSquare) => {
-        const UpdatedGameState: UpdateBoardModel = {
-            board: {
-                board: props.board,
-                activeSquare: props.activeSquare,
-                player1: props.player1,
-                player2: props.player2,
-                activePlayer: props.activePlayer,
-                pawnToUpgrade: props.pawnToUpgrade
-            },
-            currentSquare: square
-        }
-
-        props.updateBoard(UpdatedGameState);
     }
 
     const handlePromotion = (name: string) => {
@@ -79,14 +67,11 @@ const ChessBoard = (props: ChessBoardProps) => {
             name: name,
             color: props.activePlayer.color
         }
-        console.log(promotedPiece)
 
         const updatedSquare: ChessBoardSquare = {
             ...props.pawnToUpgrade,
             piece: promotedPiece
         }
-
-        console.log(updatedSquare)
 
         const UpdatedGameState: UpdateBoardModel = {
             board: {
@@ -95,7 +80,8 @@ const ChessBoard = (props: ChessBoardProps) => {
                 player1: props.player1,
                 player2: props.player2,
                 activePlayer: props.activePlayer,
-                pawnToUpgrade: updatedSquare
+                pawnToUpgrade: updatedSquare,
+                gameState: {state: null, player: null}
             },
             currentSquare: null
         }
@@ -103,6 +89,88 @@ const ChessBoard = (props: ChessBoardProps) => {
         props.updateBoard(UpdatedGameState);
     }
 
+    const isModalShowing = () => {
+        return (props.player1 == null || props.pawnToUpgrade != null || (props.gameState != null && props.gameState.state != null));
+    }
+
+    const screens = {
+        colorChoice:
+            <Modal isOpen={modalIsShowing}>
+                <ModalBody>
+                    Choose Your Color
+                </ModalBody>
+                <ModalFooter>
+                    <button onClick={() => handleColorChoice("white")}>White</button>
+                    <button onClick={() => handleColorChoice("black")}>Black</button>
+                </ModalFooter>
+            </Modal>,
+        
+        promotion:
+            <Modal isOpen={modalIsShowing}>
+                <ModalBody>Choose Your Piece</ModalBody>
+                <ModalFooter>
+                    <button onClick={() => handlePromotion("queen")}>Queen</button>
+                    <button onClick={() => handlePromotion("rook")}>Rook</button>
+                    <button onClick={() => handlePromotion("bishop")}>Bishop</button>
+                    <button onClick={() => handlePromotion("knight")}>Knight</button>
+                </ModalFooter>
+            </Modal>,
+        
+        gameOver:
+            <Modal isOpen={modalIsShowing}>
+                <ModalBody>
+                    Game Over
+                </ModalBody>
+                <ModalFooter>
+                    <button onClick={() => props.requestBoard()}>Play Again</button>
+                </ModalFooter>
+            </Modal>
+    }
+    let currentScreen = <></>;
+
+    if (props.player1 == null) {
+        currentScreen = screens.colorChoice
+    }
+
+    if (props.pawnToUpgrade != null) {
+        currentScreen = screens.promotion
+    }
+
+    if (props.gameState.state != null) {
+        currentScreen = screens.gameOver
+    }
+
+
+    return (currentScreen)
+}
+
+const ChessBoard = (props: ChessBoardProps) => {
+
+    const [modalIsShowing, setModal] = useState(false);
+
+    const toggle = () => setModal(!modalIsShowing);
+
+    useEffect(() => {
+        props.requestBoard();
+    }, []);
+
+    const handleClick = (square: ChessBoardSquare) => {
+        const UpdatedGameState: UpdateBoardModel = {
+            board: {
+                board: props.board,
+                activeSquare: props.activeSquare,
+                player1: props.player1,
+                player2: props.player2,
+                activePlayer: props.activePlayer,
+                pawnToUpgrade: props.pawnToUpgrade,
+                gameState: {state: null, player: null}
+            },
+            currentSquare: square
+        }
+
+        props.updateBoard(UpdatedGameState);
+    }
+    
 
     const activeStyles = {
         background: "#5ff0ff",
@@ -115,52 +183,46 @@ const ChessBoard = (props: ChessBoardProps) => {
         );
     }
 
-    if (props.activePlayer == null) {
-        return (
-            <div>
-                Choose your color
-                <button onClick={() => handleColorChoice("white")}>White</button>
-                <button onClick={() => handleColorChoice("black")}>Black</button>
-            </div>
-        );
-    }
-
-    if (props.pawnToUpgrade != null) {
-        return (
-            <div className="piece-upgrade-menu">
-                <button onClick={() => handlePromotion("queen")}>Queen</button>
-                <button onClick={() => handlePromotion("rook")}>Rook</button>
-                <button onClick={() => handlePromotion("bishop")}>Bishop</button>
-                <button onClick={() => handlePromotion("knight")}>Knight</button>
-            </div>
-        )
-    }
 
     return (
-        <div className="board">
-            {props.board.map(row => {
-                return (
-                    <div className="board__row" key={row[0].key[0]}>
-                        {row.map(square => {
-                            return (
-                                <div style={square.isActive ? activeStyles : {}} onClick={() => handleClick(square)}
-                                     className="board__square" key={square.key}>
-                                    {square.canMoveTo ?
-                                        <div className="board__move-indicator"/> :
-                                        ""}
-                                    {square.piece ?
-                                        <img src={"/img/" + square.piece.name + "-" + square.piece.color + ".png"}
-                                             alt=""/> : ""}
-                                </div>
-                            )
-                        })
-                        }
-                    </div>
-                )
+        <>
+            <ChessPrompt
+                board={props.board}
+                activePlayer={props.activePlayer}
+                activeSquare={props.activeSquare}
+                player1={props.activePlayer}
+                player2={props.player2}
+                gameState={props.gameState}
+                pawnToUpgrade={props.pawnToUpgrade}
+                updateBoard={props.updateBoard}
+                requestBoard={props.requestBoard}
+            />
+            <div className="board">
+
+                {props.board.map(row => {
+                    return (
+                        <div className="board__row" key={row[0].key[0]}>
+                            {row.map(square => {
+                                return (
+                                    <div style={square.isActive ? activeStyles : {}} onClick={() => handleClick(square)}
+                                         className="board__square" key={square.key}>
+                                        {square.canMoveTo ?
+                                            <div className="board__move-indicator"/> :
+                                            ""}
+                                        {square.piece ?
+                                            <img src={"/img/" + square.piece.name + "-" + square.piece.color + ".png"}
+                                                 alt=""/> : ""}
+                                    </div>
+                                )
+                            })
+                            }
+                        </div>
+                    )
 
 
-            })}
-        </div>
+                })}
+            </div>
+        </>
     )
 }
 
