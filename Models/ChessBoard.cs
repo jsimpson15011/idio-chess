@@ -77,6 +77,7 @@ namespace idiot_chess.Models
 
             Board = initBoard;
             PawnToUpgrade = null;
+            GameState = new GameState();
         }
 
         public ChessBoard(ChessBoard chessBoard)
@@ -135,6 +136,7 @@ namespace idiot_chess.Models
             Player1 = chessBoard.Player1;
             Player2 = chessBoard.Player2;
             PawnToUpgrade = chessBoard.PawnToUpgrade;
+            GameState = chessBoard.GameState;
         }
 
         public ChessSquare[][] Board { get; set; }
@@ -148,6 +150,8 @@ namespace idiot_chess.Models
         public Player Player2 { get; set; }
 
         public ChessSquare PawnToUpgrade { get; set; }
+        
+        public GameState GameState { get; set; }
 
         private readonly Dictionary<string, int[]> _squareLocations = new Dictionary<string, int[]>();
 
@@ -655,6 +659,32 @@ namespace idiot_chess.Models
             int[] currentSquareLocation = _squareLocations[key];
 
             Board[currentSquareLocation[0]][currentSquareLocation[1]].Piece = piece;
+        }
+
+        public void SwitchPlayers()
+        {
+            ActivePlayer = ActivePlayer.Color == Player1.Color ? Player2 : Player1;
+            
+            if (ActivePlayer.IsComputer)
+            {
+                var allMoves = ActivePlayer.FindAllMoves(this);
+                if (allMoves.Count == 0)
+                {
+                    GameState.Player = ActivePlayer;
+                    GameState.State = IsKingInCheck(ActivePlayer.Color) ? "Lose" : "Draw";
+                    
+                    return;
+                }
+                var random = new Random();
+                int index = random.Next(allMoves.Count);
+                SetActiveSquare(allMoves[index][0]);
+                Move(allMoves[index][1]);
+                AddAllThreats();
+                if (PawnToUpgrade == null)
+                {
+                    ActivePlayer = ActivePlayer.Color == Player1.Color ? Player2 : Player1;
+                }
+            }
         }
 
         public char[][][] BoardToPieceTable()

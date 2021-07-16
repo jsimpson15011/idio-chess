@@ -33,9 +33,9 @@ namespace idiot_chess.Controllers
                 {
                     board.SetSquareByKey(board.PawnToUpgrade.Key, board.PawnToUpgrade.Piece);
                     board.PawnToUpgrade = null;
-                    board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
+                    board.SwitchPlayers();
                 }
-                
+
                 if (currentSquare == null)
                 {
                     return CreatedAtAction("UpdateBoard", board, board);
@@ -46,6 +46,15 @@ namespace idiot_chess.Controllers
                     board.ClearAllSquareStatus();
                     board.SetActiveSquare(body.CurrentSquare);
                 }
+                
+                var allMoves = board.ActivePlayer.FindAllMoves(board);
+                if (allMoves.Count == 0)
+                {
+                    board.GameState.Player = board.ActivePlayer;
+                    board.GameState.State = board.IsKingInCheck(board.ActivePlayer.Color) ? "Lose" : "Draw";
+                    
+                    return CreatedAtAction("UpdateBoard", board, board);
+                }
 
                 if (currentSquare.CanMoveTo)
                 {
@@ -53,28 +62,7 @@ namespace idiot_chess.Controllers
                     board.AddAllThreats();
                     if (board.PawnToUpgrade == null)
                     {
-                        board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
-                    }
-                }
-
-
-                /*if (board.ActivePlayer.Color == currentSquare.Piece.Color)
-                {
-                    
-                }*/
-
-                
-                if (board.ActivePlayer.IsComputer)
-                {
-                    var allMoves = board.ActivePlayer.FindAllMoves(board);
-                    var random = new Random();
-                    int index = random.Next(allMoves.Count);
-                    board.SetActiveSquare(allMoves[index][0]);
-                    board.Move(allMoves[index][1]);
-                    board.AddAllThreats();
-                    if (board.PawnToUpgrade == null)
-                    {
-                        board.ActivePlayer = board.ActivePlayer.Color == board.Player1.Color ? board.Player2 : board.Player1;
+                        board.SwitchPlayers();
                     }
                 }
 
