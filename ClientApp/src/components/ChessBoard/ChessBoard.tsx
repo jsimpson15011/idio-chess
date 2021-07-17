@@ -16,7 +16,7 @@ type ChessBoardSquare =
     BoardStore.ChessBoardSquare
 
 
-const ChessPrompt = (props: any) => {
+const ChessPrompt = (props: ChessBoardProps) => {
 
     const [modalIsShowing, setModal] = useState(false);
 
@@ -93,6 +93,20 @@ const ChessPrompt = (props: any) => {
         return (props.player1 == null || props.pawnToUpgrade != null || (props.gameState != null && props.gameState.state != null));
     }
 
+    let gameOverMessage = "<></>";
+    
+    if(props.gameState.state != null)
+    {
+        if(props.gameState.state == "Draw")
+        {
+            gameOverMessage = "Draw"
+        }
+        if(props.gameState.state == "Lose" && props.gameState.player != null)
+        {
+            gameOverMessage = props.gameState.player.isComputer ? "Player Victory" : "Player Defeat";
+        }
+    }
+    
     const screens = {
         colorChoice:
             <Modal isOpen={modalIsShowing}>
@@ -100,8 +114,8 @@ const ChessPrompt = (props: any) => {
                     Choose Your Color
                 </ModalBody>
                 <ModalFooter>
-                    <button onClick={() => handleColorChoice("white")}>White</button>
-                    <button onClick={() => handleColorChoice("black")}>Black</button>
+                    <Button size="lg" outline onClick={() => handleColorChoice("white")}>White</Button>
+                    <Button size="lg" onClick={() => handleColorChoice("black")}>Black</Button>
                 </ModalFooter>
             </Modal>,
         
@@ -109,20 +123,23 @@ const ChessPrompt = (props: any) => {
             <Modal isOpen={modalIsShowing}>
                 <ModalBody>Choose Your Piece</ModalBody>
                 <ModalFooter>
-                    <button onClick={() => handlePromotion("queen")}>Queen</button>
-                    <button onClick={() => handlePromotion("rook")}>Rook</button>
-                    <button onClick={() => handlePromotion("bishop")}>Bishop</button>
-                    <button onClick={() => handlePromotion("knight")}>Knight</button>
+                    <Button onClick={() => handlePromotion("queen")}>Queen</Button>
+                    <Button onClick={() => handlePromotion("rook")}>Rook</Button>
+                    <Button onClick={() => handlePromotion("bishop")}>Bishop</Button>
+                    <Button onClick={() => handlePromotion("knight")}>Knight</Button>
                 </ModalFooter>
             </Modal>,
         
         gameOver:
             <Modal isOpen={modalIsShowing}>
+                <ModalHeader>
+                    <h2>Game Over</h2>
+                </ModalHeader>
                 <ModalBody>
-                    Game Over
+                    {gameOverMessage}
                 </ModalBody>
                 <ModalFooter>
-                    <button onClick={() => props.requestBoard()}>Play Again</button>
+                    <Button color="primary" size="lg" onClick={() => props.requestBoard()}>Play Again</Button>
                 </ModalFooter>
             </Modal>
     }
