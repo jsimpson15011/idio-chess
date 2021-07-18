@@ -78,6 +78,7 @@ namespace idiot_chess.Models
             Board = initBoard;
             PawnToUpgrade = null;
             GameState = new GameState();
+            PreviousMoves = new Dictionary<string, int>();
         }
 
         public ChessBoard(ChessBoard chessBoard)
@@ -137,6 +138,7 @@ namespace idiot_chess.Models
             Player2 = chessBoard.Player2;
             PawnToUpgrade = chessBoard.PawnToUpgrade;
             GameState = chessBoard.GameState;
+            PreviousMoves = chessBoard.PreviousMoves;
         }
 
         public ChessSquare[][] Board { get; set; }
@@ -152,6 +154,8 @@ namespace idiot_chess.Models
         public ChessSquare PawnToUpgrade { get; set; }
         
         public GameState GameState { get; set; }
+
+        public Dictionary<string, int> PreviousMoves { get; set; }
 
         private readonly Dictionary<string, int[]> _squareLocations = new Dictionary<string, int[]>();
 
@@ -663,6 +667,18 @@ namespace idiot_chess.Models
 
         public void SwitchPlayers()
         {
+            string pieceHash = BoardToPieceHash();
+
+            if (!PreviousMoves.TryAdd(pieceHash, 1))
+            {
+                PreviousMoves[pieceHash] += 1;
+                if (PreviousMoves[pieceHash] == 3)
+                {
+                    GameState.State = "Repetition";
+                }
+            }
+            
+            
             ActivePlayer = ActivePlayer.Color == Player1.Color ? Player2 : Player1;
             
             if (ActivePlayer.IsComputer)

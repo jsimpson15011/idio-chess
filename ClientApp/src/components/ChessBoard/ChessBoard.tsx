@@ -44,7 +44,8 @@ const ChessPrompt = (props: ChessBoardProps) => {
                 activePlayer: humanPlayer.color == "white" ? humanPlayer : computerPlayer,
                 activeSquare: props.activeSquare,
                 pawnToUpgrade: props.pawnToUpgrade,
-                gameState: {state: null, player: null}
+                gameState: {state: null, player: null},
+                previousMoves: props.previousMoves
             },
             currentSquare: null
         }
@@ -81,7 +82,8 @@ const ChessPrompt = (props: ChessBoardProps) => {
                 player2: props.player2,
                 activePlayer: props.activePlayer,
                 pawnToUpgrade: updatedSquare,
-                gameState: {state: null, player: null}
+                gameState: {state: null, player: null},
+                previousMoves: props.previousMoves
             },
             currentSquare: null
         }
@@ -100,6 +102,14 @@ const ChessPrompt = (props: ChessBoardProps) => {
         if(props.gameState.state == "Draw")
         {
             gameOverMessage = "Draw"
+        }
+        if(props.gameState.state == "Repetition")
+        {
+            gameOverMessage = "Draw by repetition"
+        }
+        if(props.gameState.state == "Material")
+        {
+            gameOverMessage = "Draw by insufficient material"
         }
         if(props.gameState.state == "Lose" && props.gameState.player != null)
         {
@@ -180,7 +190,8 @@ const ChessBoard = (props: ChessBoardProps) => {
                 player2: props.player2,
                 activePlayer: props.activePlayer,
                 pawnToUpgrade: props.pawnToUpgrade,
-                gameState: {state: null, player: null}
+                gameState: {state: null, player: null},
+                previousMoves: props.previousMoves
             },
             currentSquare: square
         }
@@ -213,6 +224,7 @@ const ChessBoard = (props: ChessBoardProps) => {
                 pawnToUpgrade={props.pawnToUpgrade}
                 updateBoard={props.updateBoard}
                 requestBoard={props.requestBoard}
+                previousMoves={props.previousMoves}
             />
             <div className="board">
 

@@ -41,6 +41,7 @@ export interface ChessBoardState {
     player2: Player | null;
     pawnToUpgrade: ChessBoardSquare | null;
     gameState: GameState;
+    previousMoves: {hash: string, value: number}
 }
 
 export interface UpdateBoardModel {
@@ -125,7 +126,8 @@ const unloadedState: ChessBoardState =
         player2: null,
         isLoading: false,
         pawnToUpgrade: null,
-        gameState: {player: null, state: null}
+        gameState: {player: null, state: null},
+        previousMoves: {hash:"x", value:0}
     };
 
 export const reducer: Reducer<ChessBoardState> = (state: ChessBoardState | undefined, incomingAction: Action): ChessBoardState => {
