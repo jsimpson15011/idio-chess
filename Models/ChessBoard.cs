@@ -728,6 +728,11 @@ namespace idiot_chess.Models
             return solution;
         }
 
+        public int[] KeyToLocation(string key)
+        {
+            return _squareLocations[key];
+        }
+
         public string BoardToPieceHash()
         {
             string solution = "";

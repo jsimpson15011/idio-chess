@@ -47,6 +47,7 @@ namespace idiot_chess.Models
 
             foreach (ChessSquare[] move in allMoves)
             {
+                ChessBoard tmpBoard = new ChessBoard(board);
                 int moveValue = 0;
                 ChessPiece playerPiece = move[0].Piece;
                 ChessPiece capturedPiece = move[1].Piece;
@@ -54,6 +55,15 @@ namespace idiot_chess.Models
                     Color == "white" ? move[1].UnderThreatFromBlack : move[1].UnderThreatFromWhite;
                 List<Threat> threatsOnCurrentSquare =
                     Color == "white" ? move[0].UnderThreatFromBlack : move[0].UnderThreatFromWhite;
+                int[] currentLocation = board.KeyToLocation(move[0].Key);
+                int[] moveLocation = board.KeyToLocation(move[1].Key);
+                
+                
+                tmpBoard.SetActiveSquare(tmpBoard.Board[currentLocation[0]][currentLocation[1]]);
+                tmpBoard.Move(tmpBoard.Board[moveLocation[0]][moveLocation[1]]);
+                tmpBoard.AddAllThreats();
+                
+                bool opponentIsInCheck = Color == "white" ? tmpBoard.IsKingInCheck("black") : tmpBoard.IsKingInCheck("white");
 
                 if (capturedPiece != null)
                 {
@@ -74,6 +84,11 @@ namespace idiot_chess.Models
                 if (threatsOnCurrentSquare != null && threatsOnMove == null)
                 {
                     moveValue += playerPiece.Value;
+                }
+
+                if (opponentIsInCheck && threatsOnMove == null)
+                {
+                    moveValue += 4;
                 }
 
 
