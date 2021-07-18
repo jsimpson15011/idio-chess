@@ -667,18 +667,17 @@ namespace idiot_chess.Models
             
             if (ActivePlayer.IsComputer)
             {
-                var allMoves = ActivePlayer.FindAllMoves(this);
-                if (allMoves.Count == 0)
+                ChessSquare[] currentMove = ActivePlayer.FindMove(this);
+
+                if (currentMove == null)
                 {
                     GameState.Player = ActivePlayer;
                     GameState.State = IsKingInCheck(ActivePlayer.Color) ? "Lose" : "Draw";
-                    
                     return;
                 }
-                var random = new Random();
-                int index = random.Next(allMoves.Count);
-                SetActiveSquare(allMoves[index][0]);
-                Move(allMoves[index][1]);
+                
+                SetActiveSquare(currentMove[0]);
+                Move(currentMove[1]);
                 AddAllThreats();
                 if (PawnToUpgrade == null)
                 {
